@@ -1,190 +1,235 @@
-public static string TitleCase(string value)
+ [ApiController]
+    [Route("[controller]")]
+    public class WeatherForecastController : ControllerBase
+    {
+        private static readonly string[] Summaries = new[]
         {
-            string titleString = ""; // destination string, this will be returned by function
-            if (!String.IsNullOrEmpty(value))
-            {
-                string[] lowerCases = new string[13] { "of", "the", "in", "a", "an", "to", "and", "at", "from", "by", "on", "or", "is" }; // list of lower case words that should only be capitalised at start and end of title
-                string[] specialCases = new string[7] { "UK", "USA", "IRS", "UCLA", "PHd", "UB40a", "MSc" }; // list of words that need capitalisation preserved at any point in title
-                string[] words = value.ToLower().Split(' ');
-                bool wordAdded = false; // flag to confirm whether this word appears in special case list
-                int counter = 1;
-                foreach (string s in words)
-                {
+            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+        };
 
-                    // check if word appears in lower case list
-                    foreach (string lcWord in lowerCases)
-                    {
-                        if (s.ToLower() == lcWord)
-                        {
-                            // if lower case word is the first or last word of the title then it still needs capital so skip this bit.
-                            if (counter == 0 || counter == words.Length) { break; };
-                            titleString += lcWord;
-                            wordAdded = true;
-                            break;
-                        }
-                    }
+        private readonly ILogger<WeatherForecastController> _logger;
 
-                    // check if word appears in special case list
-                    foreach (string scWord in specialCases)
-                    {
-                        if (s.ToUpper() == scWord.ToUpper())
-                        {
-                            titleString += scWord;
-                            wordAdded = true;
-                            break;
-                        }
-                    }
-
-                    if (!wordAdded)
-                    { // word does not appear in special cases or lower cases, so capitalise first letter and add to destination string
-                        titleString += char.ToUpper(s[0]) + s.Substring(1).ToLower();
-                    }
-                    wordAdded = false;
-
-                    if (counter < words.Length)
-                    {
-                        titleString += " "; //dont forget to add spaces back in again!
-                    }
-                    counter++;
-                }
-            }
-            return titleString;
+        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        {
+            _logger = logger;
         }
 
-
-
-public static string GenerateVerificationCode(string _Type, string _length = "4")
+        [HttpGet(Name = "GetWeatherForecast")]
+        public string Get()
         {
-            string alphabets = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            string small_alphabets = "abcdefghijklmnopqrstuvwxyz";
-            string numbers = "1234567890";
+            var dt = GetData();
 
-            string characters = numbers;
-
-            if (_Type == "1")
+            var pages = new
             {
-                characters += alphabets + small_alphabets + numbers;
-            }
-            //else if (_Type == "2")
-            //{
-            //    characters += alphabets  + numbers;
-            //}
+                PageNo = Convert.ToInt32(dt.Rows[0]["PageNo"].ToString()),
+                TotalRec = Convert.ToInt32(dt.Rows[0]["T_Rec"].ToString()),
+                TotalPages = Convert.ToInt32(dt.Rows[0]["T_Pages"].ToString())
+            };
 
-            int length = int.Parse(_length);
-            string otp = string.Empty;
-            for (int i = 0; i < length; i++)
+            dt.Columns.Remove("PageNo");
+            dt.Columns.Remove("T_Rec");
+            dt.Columns.Remove("T_Pages");
+
+            var combinedObject = new
             {
-                string character = string.Empty;
-                do
-                {
-                    int index = new Random().Next(0, characters.Length);
-                    character = characters.ToCharArray()[index].ToString();
-                } while (otp.IndexOf(character) != -1);
-                otp += character;
-            }
-
-            return otp;
+                Pages = pages,
+                ListOfData = dt
+            };
+            string combinedJson = ConvertDataTableToJson(combinedObject);
+            return combinedJson;
         }
-
-
-
- public static string GetTimeAgo(DateTime? dt)
+        private static DataTable GetData()
         {
+            var StrConnectionString = ConfigurationManager.ConnectionStrings["LawerWatchADO"].ConnectionString;
+            SqlConnection con = new SqlConnection(StrConnectionString);
+            SqlCommand cmd = new SqlCommand("SpGetAllCasesOfClient", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add(new SqlParameter("@UserID", SqlDbType.BigInt, 8, ParameterDirection.Input, false, 0, 0, "", DataRowVersion.Default, UserID));
+            cmd.Parameters.Add(new SqlParameter("@PageIndex", SqlDbType.Int, 4, ParameterDirection.Input, false, 0, 0, "", DataRowVersion.Default, PageIndex));
+            cmd.Parameters.Add(new SqlParameter("@PageSize", SqlDbType.Int, 4, ParameterDirection.Input, false, 0, 0, "", DataRowVersion.Default, PageSize));
+            cmd.Parameters.Add(new SqlParameter("@ReturnMessage", SqlDbType.VarChar, 200, ParameterDirection.Output, false, 0, 0, "", DataRowVersion.Default, DBNull.Value));
+            cmd.Parameters.Add(new SqlParameter("@ReturnValue", SqlDbType.BigInt, 8, ParameterDirection.ReturnValue, false, 0, 0, "", DataRowVersion.Proposed, 0));
+
+            DataTable dt = new DataTable();
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            da.Fill(dt);
+
+            dt.Columns.Add("PageNo", typeof(Int32));
+            dt.Columns.Add("T_Rec", typeof(Int32));
+            dt.Columns.Add("T_Pages", typeof(Int32));
+
+            dt.Columns.Add("Id", typeof(Int32));
+            dt.Columns.Add("Name", typeof(string));
+            dt.Columns.Add("TemperatureC", typeof(decimal));
+
+            for (int i = 0; i < 10; i++)
+            {
+                DataRow datarowname = dt.NewRow();
+                datarowname["PageNo"] = 1;
+                datarowname["T_Rec"] = 20;
+                datarowname["T_Pages"] = 2;
+
+                datarowname["Id"] = i + 1;
+                datarowname["Name"] = Summaries[i];
+                datarowname["TemperatureC"] = Random.Shared.Next(-20, 55);
+                dt.Rows.Add(datarowname);
+            }
+            return dt;
+        }
+        private static string ConvertDataTableToJson(object dataTable)
+        {
+            string jsonResult = string.Empty;
             try
             {
-                if (dt.HasValue)
-                {
-                    TimeSpan span = DateTime.Now - Convert.ToDateTime(dt);
-                    if (span.Days > 365)
-                    {
-                        int years = (span.Days / 365);
-                        if (span.Days % 365 != 0)
-                            years += 1;
-                        return String.Format("{0} {1} ago",
-                        years, years == 1 ? "year" : "years");
-                    }
-                    if (span.Days > 30)
-                    {
-                        int months = (span.Days / 30);
-                        if (span.Days % 31 != 0)
-                            months += 1;
-                        return String.Format("{0} {1} ago",
-                        months, months == 1 ? "month" : "months");
-                    }
-                    if (span.Days == 1)
-                        return String.Format("{0}",
-                                         "Yesterday");
-                    else if (span.Days > 1)
-                        return String.Format("{0} {1} ago",
-                        span.Days, span.Days == 1 ? "day" : "days");
-                    if (span.Hours > 0)
-                        return String.Format("{0} {1} ago",
-                        span.Hours, span.Hours == 1 ? "hour" : "hours");
-                    if (span.Minutes > 0)
-                        return String.Format("{0} {1} ago",
-                        span.Minutes, span.Minutes == 1 ? "minute" : "minutes");
-                    if (span.Seconds > 5)
-                        return String.Format("{0} seconds ago", span.Seconds);
-                    if (span.Seconds <= 5)
-                        return "just now";
-                    return string.Empty;
-                }
-                else
-                {
-                    return string.Empty;
-                }
+                jsonResult = JsonConvert.SerializeObject(dataTable, Formatting.Indented);
             }
-            catch (Exception)
-            {
-                return string.Empty;
-            }
-        }
-
-
- public static string GetTimeAgo2(DateTime? dt)
-        {
-            try
-            {
-                if (dt.HasValue)
-                {
-                    DateTime _time = Convert.ToDateTime("2016-10-07 09:43:31.797");
-
-                    TimeSpan span = _time - Convert.ToDateTime(dt);
-                    if (span.Days > 365)
-                    {
-                        return Convert.ToDateTime(dt).ToString("MM/dd/yyyy");
-                    }
-                    if (span.Days > 30)
-                    {
-                        return Convert.ToDateTime(dt).ToString("MM/dd/yyyy");
-                    }
-                    if (span.Days == 1)
-                        return String.Format("{0}",
-                                         "Yesterday");
-                    else if (span.Days > 1)
-                        return Convert.ToDateTime(dt).ToString("dddd");
-                    if (span.Hours > 0)
-                        return Convert.ToDateTime(dt).ToString("h:mm tt");
-                    if (span.Minutes > 0)
-                        return Convert.ToDateTime(dt).ToString("h:mm tt");
-                    if (span.Seconds > 5)
-                        return Convert.ToDateTime(dt).ToString("h:mm tt");
-                    if (span.Seconds <= 5)
-                        return Convert.ToDateTime(dt).ToString("h:mm tt");
-                    return string.Empty;
-                }
-                else
-                {
-                    return string.Empty;
-                }
-            }
-#pragma warning disable CS0168 // The variable 'ex' is declared but never used
             catch (Exception ex)
-#pragma warning restore CS0168 // The variable 'ex' is declared but never used
             {
-                return string.Empty;
+                // Handle the exception if necessary
+                Console.WriteLine("Error converting DataTable to JSON: " + ex.Message);
             }
+            return jsonResult;
         }
 
+
+
+        public enum SqlCommandType
+        {
+            //Summary:
+            //'  An SQL text command. (Default.)
+            Text = 1,
+
+            //' //
+            //' // Summary:
+            //'  //     The name of a stored procedure.
+            StoredProcedure = 4,
+            //'  //
+            //'// Summary:
+            //'//     The name of a table.
+            TableDirect = 512
+        }
+        private List<SqlParameter> m_SqlParameters;
+        private string m_Commandtext;
+        private string m_ConStr;
+        private string StrConnectionString = "";
+        private SqlConnection SqlCon;
+        private SqlCommand SqlComm;
+        private SqlTransaction SqlTran;
+        private Boolean _IsTransaction;
+        private string _ErrorDescription = string.Empty;
+        public DataTable ExecuteDataTable(string CmdTxt, SqlCommandType CmdType, SqlCommand _SqlComm, bool CloseConnection = true)
+        {
+            DataTable Dt = new DataTable();
+            SqlDataAdapter Adapter = new SqlDataAdapter();
+
+            try
+            {
+                SqlComm = _SqlComm;
+                CreateCammand(CmdTxt, CmdType);
+                Adapter.SelectCommand = SqlComm;
+                Adapter.Fill(Dt);
+            }
+            catch (Exception ex)
+            {
+                _ErrorDescription = ex.Message;
+            }
+            finally
+            {
+                if (CloseConnection & SqlComm.Connection.State != ConnectionState.Closed)
+                {
+                    SqlComm.Connection.Close();
+                    SqlComm.Dispose();
+                    SqlCon.Dispose();
+                    SqlCon.Close();
+                    SqlCon = null;
+                }
+            }
+            return Dt;
+        }
+
+        public void CreateCammand(string CmdTxt, SqlCommandType SqlCommandType)
+        {
+            if (SqlComm == null)
+            {
+                SqlComm = new SqlCommand();
+            }
+
+            if (SqlCon == null)
+            {
+               // OpenConnection();
+            }
+            else
+            {
+                if (SqlCon.State == 0)
+                {
+                    SqlCon.Open();
+                }
+            }
+
+            if (_IsTransaction)
+            {
+                SqlComm.Transaction = SqlTran;
+            }
+
+
+            SqlComm.Connection = SqlCon;
+            SqlComm.CommandText = CmdTxt.ToString();
+
+            switch (SqlCommandType)
+            {
+                case SqlCommandType.StoredProcedure:
+                    SqlComm.CommandType = CommandType.StoredProcedure;
+                    break;
+                case SqlCommandType.Text:
+                    SqlComm.CommandType = CommandType.Text;
+                    break;
+                case SqlCommandType.TableDirect:
+                    SqlComm.CommandType = CommandType.TableDirect;
+                    break;
+            }
+
+
+
+        }
+   
+    }
+
+
+CREATE TABLE SubscriptionPlanType
+(
+	PlanTypeID		bigint IDENTITY(1,1) NOT NULL,
+	PlanTypeName	varchar(300)		 NOT NULL,
+	PlanDetails		varchar(400)		 NULL,
+	PlanPrice		decimal(7,2)		 NULL,
+
+	RecordStatus	varchar(20)			 NULL default 'Active',
+	ModifiedDate	datetime			 NULL,
+	CreatedDate		datetime			 NOT NULL default GETDATE(),
+	
+	CONSTRAINT PK_SubscriptionPlanType_PlanTypeID  PRIMARY KEY CLUSTERED (PlanTypeID)
+)
+
+GO
+
+--DROP TABLE UserSubscriptions
+
+SELECT * FROM UserSubscriptions
+
+--update UserSubscriptions set RecordStatus = 'Deleted' 
+
+CREATE TABLE UserSubscriptions
+(
+	UserPlanID		 bigint IDENTITY(1,1) NOT NULL,
+	PlanTypeID		 bigint				 NOT NULL,
+	UserID			 bigint				 NOT NULL,
+	SubscribeDate	 DateTime			 NOT NULL default GETDATE(),
+	SubscribeEndDate DateTime			 NOT NULL,
+
+	RecordStatus	 varchar(20)		 NULL default 'Active',
+	ModifiedDate	 datetime			 NULL,
+	CreatedDate		 datetime			 NOT NULL default GETDATE(),
+	
+	CONSTRAINT PK_UserSubscriptions_UserPlanID  PRIMARY KEY CLUSTERED (UserPlanID)
+)
 
 
