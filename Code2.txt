@@ -1,0 +1,336 @@
+ [ApiController]
+    [Route("[controller]")]
+    public class WeatherForecastController : ControllerBase
+    {
+        private static readonly string[] Summaries = new[]
+        {
+            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+        };
+
+        private readonly ILogger<WeatherForecastController> _logger;
+
+        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        {
+            _logger = logger;
+        }
+
+        [HttpGet(Name = "GetWeatherForecast")]
+        public string Get()
+        {
+            var dt = GetData();
+
+            var pages = new
+            {
+                PageNo = Convert.ToInt32(dt.Rows[0]["PageNo"].ToString()),
+                TotalRec = Convert.ToInt32(dt.Rows[0]["T_Rec"].ToString()),
+                TotalPages = Convert.ToInt32(dt.Rows[0]["T_Pages"].ToString())
+            };
+
+            dt.Columns.Remove("PageNo");
+            dt.Columns.Remove("T_Rec");
+            dt.Columns.Remove("T_Pages");
+
+            var combinedObject = new
+            {
+                Pages = pages,
+                ListOfData = dt
+            };
+            string combinedJson = ConvertDataTableToJson(combinedObject);
+            return combinedJson;
+        }
+        private static DataTable GetData()
+        {
+            var StrConnectionString = ConfigurationManager.ConnectionStrings["LawerWatchADO"].ConnectionString;
+            SqlConnection con = new SqlConnection(StrConnectionString);
+            SqlCommand cmd = new SqlCommand("SpGetAllCasesOfClient", con);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.Add(new SqlParameter("@UserID", SqlDbType.BigInt, 8, ParameterDirection.Input, false, 0, 0, "", DataRowVersion.Default, UserID));
+            cmd.Parameters.Add(new SqlParameter("@PageIndex", SqlDbType.Int, 4, ParameterDirection.Input, false, 0, 0, "", DataRowVersion.Default, PageIndex));
+            cmd.Parameters.Add(new SqlParameter("@PageSize", SqlDbType.Int, 4, ParameterDirection.Input, false, 0, 0, "", DataRowVersion.Default, PageSize));
+            cmd.Parameters.Add(new SqlParameter("@ReturnMessage", SqlDbType.VarChar, 200, ParameterDirection.Output, false, 0, 0, "", DataRowVersion.Default, DBNull.Value));
+            cmd.Parameters.Add(new SqlParameter("@ReturnValue", SqlDbType.BigInt, 8, ParameterDirection.ReturnValue, false, 0, 0, "", DataRowVersion.Proposed, 0));
+
+            DataTable dt = new DataTable();
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            da.Fill(dt);
+
+            dt.Columns.Add("PageNo", typeof(Int32));
+            dt.Columns.Add("T_Rec", typeof(Int32));
+            dt.Columns.Add("T_Pages", typeof(Int32));
+
+            dt.Columns.Add("Id", typeof(Int32));
+            dt.Columns.Add("Name", typeof(string));
+            dt.Columns.Add("TemperatureC", typeof(decimal));
+
+            for (int i = 0; i < 10; i++)
+            {
+                DataRow datarowname = dt.NewRow();
+                datarowname["PageNo"] = 1;
+                datarowname["T_Rec"] = 20;
+                datarowname["T_Pages"] = 2;
+
+                datarowname["Id"] = i + 1;
+                datarowname["Name"] = Summaries[i];
+                datarowname["TemperatureC"] = Random.Shared.Next(-20, 55);
+                dt.Rows.Add(datarowname);
+            }
+            return dt;
+        }
+        private static string ConvertDataTableToJson(object dataTable)
+        {
+            string jsonResult = string.Empty;
+            try
+            {
+                jsonResult = JsonConvert.SerializeObject(dataTable, Formatting.Indented);
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception if necessary
+                Console.WriteLine("Error converting DataTable to JSON: " + ex.Message);
+            }
+            return jsonResult;
+        }
+
+
+
+        public enum SqlCommandType
+        {
+            //Summary:
+            //'  An SQL text command. (Default.)
+            Text = 1,
+
+            //' //
+            //' // Summary:
+            //'  //     The name of a stored procedure.
+            StoredProcedure = 4,
+            //'  //
+            //'// Summary:
+            //'//     The name of a table.
+            TableDirect = 512
+        }
+        private List<SqlParameter> m_SqlParameters;
+        private string m_Commandtext;
+        private string m_ConStr;
+        private string StrConnectionString = "";
+        private SqlConnection SqlCon;
+        private SqlCommand SqlComm;
+        private SqlTransaction SqlTran;
+        private Boolean _IsTransaction;
+        private string _ErrorDescription = string.Empty;
+        public DataTable ExecuteDataTable(string CmdTxt, SqlCommandType CmdType, SqlCommand _SqlComm, bool CloseConnection = true)
+        {
+            DataTable Dt = new DataTable();
+            SqlDataAdapter Adapter = new SqlDataAdapter();
+
+            try
+            {
+                SqlComm = _SqlComm;
+                CreateCammand(CmdTxt, CmdType);
+                Adapter.SelectCommand = SqlComm;
+                Adapter.Fill(Dt);
+            }
+            catch (Exception ex)
+            {
+                _ErrorDescription = ex.Message;
+            }
+            finally
+            {
+                if (CloseConnection & SqlComm.Connection.State != ConnectionState.Closed)
+                {
+                    SqlComm.Connection.Close();
+                    SqlComm.Dispose();
+                    SqlCon.Dispose();
+                    SqlCon.Close();
+                    SqlCon = null;
+                }
+            }
+            return Dt;
+        }
+
+        public void CreateCammand(string CmdTxt, SqlCommandType SqlCommandType)
+        {
+            if (SqlComm == null)
+            {
+                SqlComm = new SqlCommand();
+            }
+
+            if (SqlCon == null)
+            {
+               // OpenConnection();
+            }
+            else
+            {
+                if (SqlCon.State == 0)
+                {
+                    SqlCon.Open();
+                }
+            }
+
+            if (_IsTransaction)
+            {
+                SqlComm.Transaction = SqlTran;
+            }
+
+
+            SqlComm.Connection = SqlCon;
+            SqlComm.CommandText = CmdTxt.ToString();
+
+            switch (SqlCommandType)
+            {
+                case SqlCommandType.StoredProcedure:
+                    SqlComm.CommandType = CommandType.StoredProcedure;
+                    break;
+                case SqlCommandType.Text:
+                    SqlComm.CommandType = CommandType.Text;
+                    break;
+                case SqlCommandType.TableDirect:
+                    SqlComm.CommandType = CommandType.TableDirect;
+                    break;
+            }
+
+
+
+        }
+   
+    }
+
+
+
+CREATE TABLE UserSubscriptions
+(
+	UserPlanID		 bigint IDENTITY(1,1) NOT NULL,
+	PlanTypeID		 bigint				 NOT NULL,
+	UserID			 bigint				 NOT NULL,
+	SubscribeDate	 DateTime			 NOT NULL default GETDATE(),
+	SubscribeEndDate DateTime			 NOT NULL,
+
+	RecordStatus	 varchar(20)		 NULL default 'Active',
+	ModifiedDate	 datetime			 NULL,
+	CreatedDate		 datetime			 NOT NULL default GETDATE(),
+	
+	CONSTRAINT PK_UserSubscriptions_UserPlanID  PRIMARY KEY CLUSTERED (UserPlanID)
+)
+
+GO
+
+CREATE TABLE AdminUsers
+(
+	AdminUserId		int IDENTITY(1,1) NOT NULL,
+	Email			nvarchar(50) NULL,
+	Password		nvarchar(50) NULL,
+	FirstName		nvarchar(50) NULL,
+	LastName		nvarchar(50) NULL,
+	Role			nvarchar(50) NULL,
+	CreatedDate		datetime NULL,
+	ModifiedDate	datetime NULL,
+	RecordStatus	nvarchar(50) NULL,
+)
+GO
+
+
+
+
+
+
+
+public DataTable ASpGetSuperUsers(string SearchText, string SortBy, int PageIndex, int PageSize)
+        {
+            var sqlManager = new SqlManager();
+            var sCmd = new SqlCommand();
+            DataTable dt = new DataTable();
+
+            sCmd.Parameters.Add(new SqlParameter("@SearchText", SqlDbType.VarChar, 500, ParameterDirection.Input, false, 0, 0, "", DataRowVersion.Default, SearchText));
+            sCmd.Parameters.Add(new SqlParameter("@SortBy", SqlDbType.VarChar, 100, ParameterDirection.Input, false, 0, 0, "", DataRowVersion.Default, SortBy));
+
+            sCmd.Parameters.Add(new SqlParameter("@PageIndex", SqlDbType.Int, 4, ParameterDirection.Input, false, 0, 0, "", DataRowVersion.Default, PageIndex));
+            sCmd.Parameters.Add(new SqlParameter("@PageSize", SqlDbType.Int, 4, ParameterDirection.Input, false, 0, 0, "", DataRowVersion.Default, PageSize));
+
+            sCmd.Parameters.Add(new SqlParameter("@ReturnMessage", SqlDbType.VarChar, 200, ParameterDirection.Output, false, 0, 0, "", DataRowVersion.Default, DBNull.Value));
+            sCmd.Parameters.Add(new SqlParameter("@ReturnValue", SqlDbType.BigInt, 8, ParameterDirection.ReturnValue, false, 0, 0, "", DataRowVersion.Proposed, 0));
+
+            dt = sqlManager.ExecuteDataTable("ASpGetAdminUsers", SqlCommandType.StoredProcedure, sCmd);
+            _ErrorDescription = sqlManager.ErrorDescription;
+
+            if (_ErrorDescription != "")
+            {
+                throw new Exception(_ErrorDescription);
+            }
+            else
+            {
+                _ErrorDescription = sCmd.Parameters["@ReturnMessage"].Value.ToString();
+                if (_ErrorDescription == "")
+                {
+                    _RetVal = Convert.ToInt32(sCmd.Parameters["@ReturnValue"].Value);
+                }
+            }
+
+            return dt;
+        }
+
+
+
+
+--[dbo].[ASpGetAdminUsers] null,'ac'    
+Create PROCEDURE [dbo].[ASpGetAdminUsers]    
+ @SearchText as Varchar(500) = null,    
+ @SortBy as varchar(100) = NULL,    
+ @PageIndex as int = 1,    
+ @PageSize as int = 20,    
+ @ReturnMessage as VARCHAR(200) = null output    
+AS    
+SET FMTONLY OFF    
+BEGIN    
+    
+ DECLARE @Start as int;    
+ DECLARE @end as int;    
+ DECLARE @FromDate as DATETIME,    
+      @ToDate As datetime     
+     
+ DECLARE @strSQL VARCHAR(5000) = '';    
+  DECLARE @strWhere VARCHAR(5000) = '';      
+ DECLARE @strWhere_T VARCHAR(2000) = '';    
+    
+ SET @FromDate  = CAST(CONVERT(VARCHAR,dateadd(day,-30, GETDATE()),101) AS DATETIME)    
+ SET @ToDate    = CAST(CONVERT(VARCHAR,GETDATE(),101) AS DATETIME)    
+    
+ set @Start = (@PageIndex - 1) * @pageSize + 1;    
+ set @end = @PageIndex * @pageSize;    
+    
+ SET @strWhere_T = ' WHERE A.RowIndex >= ' + CAST(@Start AS varchar) +    
+         ' AND A.RowIndex <= ' + CAST(@end AS varchar) + '  '      
+     
+    
+ If Isnull(@SearchText,'') <> ''    
+  set @strWhere = ' And B.Email like ''%' + @SearchText + '%''    
+        or B.Role like ''%' + @SearchText + '%''    
+        or B.RecordStatus like ''%' + @SearchText + '%'' '    
+    
+    
+     
+SET @strSQl='SELECT * FROM (    
+SELECT *,    
+  ROW_NUMBER() OVER (ORDER BY ' +ISNULL(@SortBy,'B.AdminUserId DESC')+' ) as RowIndex,    
+  '+ CAST(@PageIndex AS VARCHAR)+'   as PageNo,    
+  COUNT(B.AdminUserId) OVER (PARTITION BY -1) AS T_Rec,    
+  CEILING(CAST(COUNT(B.AdminUserId) OVER (PARTITION BY -1) AS DECIMAL) /  CAST( '+ CAST(@PageSize  AS VARCHAR)+' AS DECIMAL) ) AS T_Pages    
+ FROM (     
+  SELECT     
+      A.AdminUserId,    
+      A.FirstName,    
+      A.LastName,    
+      A.Email,    
+      A.Role,    
+      A.RecordStatus,    
+      A.CreatedDate    
+  FROM AdminUsers A    
+  where A.RecordStatus != ''Deleted''    
+ )B WHERE 1=1    
+  '+ ISNULL(@strWhere,'') +'    
+ )A ' + @strWhere_T    
+    
+ PRINT @strSQl    
+ EXEC(@strSQl)    
+     
+END 
+
+
