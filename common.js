@@ -200,10 +200,11 @@ var Common = function () {
 		});
 	}
 
-	_this.Confirm = function () {
+	_this.Confirm = function (text,callback) {
 		swal({
 			title: "Are you sure?",
-			text: "You will not be able to recover this entry!",
+			text: text,
+			//text: "You will not be able to recover this entry!",
 			type: "warning",
 			showCancelButton: true,
 			confirmButtonColor: "#e74c3c",
@@ -214,9 +215,9 @@ var Common = function () {
 		}, function (isConfirm) {
 			if (isConfirm) {
 				console.log(isConfirm);
-				return true;
+				callback(true);
 			} else {
-				return false;
+				callback(false);
 			}
 		});
 	}

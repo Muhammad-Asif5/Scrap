@@ -83,15 +83,22 @@ function FilterRecords(page) {
 }
 
 function CreateTable(data) {
+	
 	var html = "";
 	if (data.Items == undefined) return;
-
 	for (var i = 0; i < data.Items.length; i++) {
+		var imagePath = '';
+		if (data.Items[i].ImagePath == null || data.Items[i].ImagePath == "") {
+			imagePath = '/Areas/Admin/Content/images/avatar-1.svg';
+		} else {
+			imagePath = data.Items[i].ImagePath;
+		}
 		html += "<tr id=tr" + data.Items[i].InfoId + ">"
+		html += "<td style='word-break:break-all'><img style='width: 50px;' src='" + imagePath + "' alt='No Image' /></td>"
 		html += "<td style='word-break:break-all'>" + GetDateValue(data.Items[i].CreatedDate) + "</td>"
 		html += "<td style='word-break:break-all'>" + data.Items[i].InfoTitle + "</td>"
 		html += "<td style='word-break:break-all'>" + data.Items[i].InfoDetail + "</td>"
-		html += "<td style='word-break:break-all'>" + data.Items[i].RecordStatus + "</td>"
+		html += "<td style='word-break:break-all'>" + data.Items[i].Urls + "</td>"
 		if (data.Items[i].InfoId != 1) {
 			html += "<td><a href='javascript:void(0)' class='btn btn-info btn-sm view' data-InfoId='" + data.Items[i].InfoId + "' onclick='GetById(this)' style='margin-left:5px;margin-top: 5px;'>Edit </a></div>";
 			html += "<input type='button' class='btn btn-info btn-sm Delete' value='Del' data-InfoId='" + data.Items[i].InfoId + "' onclick='Delete(" + data.Items[i].InfoId + ")' style='margin-left:5px;margin-top: 5px;' /></td>";
@@ -104,7 +111,7 @@ function CreateTable(data) {
 	$("#tbodyUsers").html(html);
 }
 
-function Paginate(data) {
+function Paginate(data) { 
 	var pagination = "";
 	var counter = 0;
 	if (data.PageNumber > 1) {
@@ -177,40 +184,39 @@ function roundTo2Decimals(numberToRound) {
 
 
 function SaveInfoDetails() {
-	debugger
 	var c = new Common();
-	var fdata = c.GetFormValues("#addinfo-form");
-	var data = new FormData(); // Create a FormData object
-	for (var key in fdata) {
-		data.append(key, fdata[key]);
+	if (c.validate("#addinfo-form")) {		
+		var fdata = c.GetFormValues("#addinfo-form");
+		var data = new FormData(); // Create a FormData object
+		for (var key in fdata) {
+			data.append(key, fdata[key]);
+		}
+		var filename = document.getElementById("MediaFile").files[0];
+		data.append("ImageUpload", filename);
+		data.append("InfoId", $('#hfInfoId').val());
+
+		c.AjaxCallFormData("Admin/InfoDetails/SaveUpdateInfoDetails", data, true, function (d) {
+			if (d.Status) {
+				$('#modalAddUser').modal('hide');
+				c.ShowMessage(d.RetMessage, "success");
+				FilterRecords(pageNumber);
+			}
+			else {
+				c.ShowMessage(d.RetMessage, "error");
+			}
+
+		});
 	}
-	var filename = document.getElementById("MediaFile").files[0];
-	data.append("ImageUpload", filename);
-	data.append("InfoId", $('#hfInfoId').val());
-
-	c.AjaxCallFormData("Admin/InfoDetails/SaveUpdateInfoDetails", data, true, function (d) {
-		if (d.Status) {
-			debugger
-			var r = fdata;
-			$('#modalAddUser').modal('hide');
-			c.ShowMessage(d.RetMessage, "success");
-			FilterRecords(pageNumber);
-		}
-		else {
-			c.ShowMessage(d.RetMessage, "error");
-		}
-
-	});
-
 }
 
 function GetById(obj) {
+	debugger
 	var c = new Common();
 	var data = {};
 	data["InfoId"] = $(obj).data('infoid');
 	data = JSON.stringify(data);
 	c.AjaxCall("Admin/InfoDetails/GetInfoDetailById", data, "POST", true, function (d) {
-		$("#addinfo-form input").each(function (i, v) {
+		$("#addinfo-form input, textarea").each(function (i, v) {
 			$(v).val(d.Data[v["name"]]);
 		})
 		$("[data-elemement=RecordStatus]").val(d.Data["RecordStatus"]);
@@ -220,18 +226,9 @@ function GetById(obj) {
 }
 
 function Delete(id) {
+
 	var c = new Common();
-	swal({
-		title: "Are you sure?",
-		text: "You will not be able to recover this entry!",
-		type: "warning",
-		showCancelButton: true,
-		confirmButtonColor: "#e74c3c",
-		confirmButtonText: "Yes, delete it!",
-		cancelButtonText: "No, cancel please!",
-		closeOnConfirm: true,
-		closeOnCancel: true
-	}, function (isConfirm) {
+	c.Confirm("You will not be able to recover this entry!", function (isConfirm) {
 		if (isConfirm) {
 			new Common().AjaxCall("Admin/InfoDetails/Delete/" + id, {}, "DELETE", true, function (d) {
 				if (d) {
@@ -243,5 +240,5 @@ function Delete(id) {
 		} else {
 			return false;
 		}
-	});
+	})
 }
