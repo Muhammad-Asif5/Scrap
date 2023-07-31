@@ -177,6 +177,7 @@ function roundTo2Decimals(numberToRound) {
 
 
 function SaveInfoDetails() {
+	debugger
 	var c = new Common();
 	var fdata = c.GetFormValues("#addinfo-form");
 	var data = new FormData(); // Create a FormData object
@@ -185,11 +186,12 @@ function SaveInfoDetails() {
 	}
 	var filename = document.getElementById("MediaFile").files[0];
 	data.append("ImageUpload", filename);
-	debugger
 	data.append("InfoId", $('#hfInfoId').val());
-	//data["InfoId"] = $('#hfInfoId').val();
+
 	c.AjaxCallFormData("Admin/InfoDetails/SaveUpdateInfoDetails", data, true, function (d) {
 		if (d.Status) {
+			debugger
+			var r = fdata;
 			$('#modalAddUser').modal('hide');
 			c.ShowMessage(d.RetMessage, "success");
 			FilterRecords(pageNumber);
@@ -203,7 +205,6 @@ function SaveInfoDetails() {
 }
 
 function GetById(obj) {
-	debugger
 	var c = new Common();
 	var data = {};
 	data["InfoId"] = $(obj).data('infoid');
@@ -232,7 +233,7 @@ function Delete(id) {
 		closeOnCancel: true
 	}, function (isConfirm) {
 		if (isConfirm) {
-			new Common().AjaxCall("Admin/SuperAdmin/Delete/" + id, {}, "DELETE", true, function (d) {
+			new Common().AjaxCall("Admin/InfoDetails/Delete/" + id, {}, "DELETE", true, function (d) {
 				if (d) {
 					$('#tr' + id).remove();
 					c.ShowMessage("Deleted successfully.., ", "success");
