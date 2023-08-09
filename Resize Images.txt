@@ -1,0 +1,10 @@
+
+WebImage img = new WebImage(uploadFile.InputStream);
+            if (img.Width > 4583)
+            {
+                img.Resize(400, 400);
+                img.AddTextWatermark("here is text","White",15);
+                var path = Server.MapPath("~/Content/");
+                img.Save(path+DateTime.Now.ToString("yyyyy_mm_dd_hh_mm_ss"));
+            }
+
