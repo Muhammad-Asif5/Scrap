@@ -1,0 +1,49 @@
+
+https://api.storekit-sandbox.itunes.apple.com/inApps/v1/subscriptions/2000000437631978
+https://api.storekit-sandbox.itunes.apple.com/inApps/v1/history/2000000437631978
+
+public static string CreateAppleJwtToken()
+{
+    var dsa = GetECDsa();
+    string IOSKeyId = "2UF5U4J372";
+    return CreateAppleJwt(dsa, IOSKeyId);
+}
+static ECDsa GetECDsa()
+{
+    string IOS_Certificate_p8 = WebConfigurationManager.AppSettings["IOS_Certificate_p8"].ToString();
+    using (TextReader reader = System.IO.File.OpenText(IOS_Certificate_p8))
+    {
+        var ecPrivateKeyParameters =
+        (ECPrivateKeyParameters)new Org.BouncyCastle.OpenSsl.PemReader(reader).ReadObject();
+
+        var q = ecPrivateKeyParameters.Parameters.G.Multiply(ecPrivateKeyParameters.D).Normalize();
+        var qx = q.AffineXCoord.GetEncoded();
+        var qy = q.AffineYCoord.GetEncoded();
+        var d = ecPrivateKeyParameters.D.ToByteArrayUnsigned();
+
+        // Convert the BouncyCastle key to a Native Key.
+        var msEcp = new ECParameters { Curve = ECCurve.NamedCurves.nistP256, Q = { X = qx, Y = qy }, D = d };
+        return ECDsa.Create(msEcp);
+    }
+}
+static string CreateAppleJwt(ECDsa key, string keyId)
+{
+    var securityKey = new ECDsaSecurityKey(key) { KeyId = keyId };
+    var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.EcdsaSha256);
+    IDictionary<string, object> ageDictionary = new Dictionary<string, object>();
+    ageDictionary.Add("bid", "com.app.lawyerwatch");
+    var descriptor = new SecurityTokenDescriptor
+    {
+        IssuedAt = DateTime.UtcNow,
+        Issuer = "07173f98-9a34-49ce-8cea-a34da2b3ec07",
+        SigningCredentials = credentials,
+        Audience = "appstoreconnect-v1",
+        Expires = DateTime.UtcNow.AddMinutes(15),
+        Claims = ageDictionary,
+    };
+
+    var handler = new JwtSecurityTokenHandler();
+    var encodedToken = handler.CreateEncodedJwt(descriptor);
+    return encodedToken;
+}
+
