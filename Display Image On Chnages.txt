@@ -1,0 +1,22 @@
+
+selectedFiles: File[] = [];
+selectedFileUrl: string | null = null;
+onImageSelected(event: any): void {
+    this.selectedFileUrl = '';
+    this.selectedFiles= [];
+    if (event.target.files) {
+      const file = event.target.files[0];
+      this.selectedFiles.push(file);
+      this.displaySelectedImage();
+    }
+  }
+
+  displaySelectedImage() {
+    if (this.selectedFiles) {
+      const reader = new FileReader();
+      reader.readAsDataURL(this.selectedFiles[0]);
+      reader.onload = () => {
+        this.selectedFileUrl = reader.result as string;
+      };
+    }
+  }
