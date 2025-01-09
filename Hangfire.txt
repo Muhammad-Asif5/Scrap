@@ -1,0 +1,459 @@
+USE [AcademicDb]
+GO
+/****** Object:  Schema [HangFire]    Script Date: 1/9/2025 8:50:06 AM ******/
+CREATE SCHEMA [HangFire]
+GO
+/****** Object:  Table [dbo].[__EFMigrationsHistory]    Script Date: 1/9/2025 8:50:06 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[__EFMigrationsHistory](
+	[MigrationId] [nvarchar](150) NOT NULL,
+	[ProductVersion] [nvarchar](32) NOT NULL,
+ CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY CLUSTERED 
+(
+	[MigrationId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [HangFire].[AggregatedCounter]    Script Date: 1/9/2025 8:50:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [HangFire].[AggregatedCounter](
+	[Key] [nvarchar](100) NOT NULL,
+	[Value] [bigint] NOT NULL,
+	[ExpireAt] [datetime] NULL,
+ CONSTRAINT [PK_HangFire_CounterAggregated] PRIMARY KEY CLUSTERED 
+(
+	[Key] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [HangFire].[Counter]    Script Date: 1/9/2025 8:50:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [HangFire].[Counter](
+	[Key] [nvarchar](100) NOT NULL,
+	[Value] [int] NOT NULL,
+	[ExpireAt] [datetime] NULL,
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+ CONSTRAINT [PK_HangFire_Counter] PRIMARY KEY CLUSTERED 
+(
+	[Key] ASC,
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [HangFire].[Hash]    Script Date: 1/9/2025 8:50:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [HangFire].[Hash](
+	[Key] [nvarchar](100) NOT NULL,
+	[Field] [nvarchar](100) NOT NULL,
+	[Value] [nvarchar](max) NULL,
+	[ExpireAt] [datetime2](7) NULL,
+ CONSTRAINT [PK_HangFire_Hash] PRIMARY KEY CLUSTERED 
+(
+	[Key] ASC,
+	[Field] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = ON, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [HangFire].[Job]    Script Date: 1/9/2025 8:50:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [HangFire].[Job](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[StateId] [bigint] NULL,
+	[StateName] [nvarchar](20) NULL,
+	[InvocationData] [nvarchar](max) NOT NULL,
+	[Arguments] [nvarchar](max) NOT NULL,
+	[CreatedAt] [datetime] NOT NULL,
+	[ExpireAt] [datetime] NULL,
+ CONSTRAINT [PK_HangFire_Job] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [HangFire].[JobParameter]    Script Date: 1/9/2025 8:50:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [HangFire].[JobParameter](
+	[JobId] [bigint] NOT NULL,
+	[Name] [nvarchar](40) NOT NULL,
+	[Value] [nvarchar](max) NULL,
+ CONSTRAINT [PK_HangFire_JobParameter] PRIMARY KEY CLUSTERED 
+(
+	[JobId] ASC,
+	[Name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [HangFire].[JobQueue]    Script Date: 1/9/2025 8:50:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [HangFire].[JobQueue](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[JobId] [bigint] NOT NULL,
+	[Queue] [nvarchar](50) NOT NULL,
+	[FetchedAt] [datetime] NULL,
+ CONSTRAINT [PK_HangFire_JobQueue] PRIMARY KEY CLUSTERED 
+(
+	[Queue] ASC,
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [HangFire].[List]    Script Date: 1/9/2025 8:50:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [HangFire].[List](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[Key] [nvarchar](100) NOT NULL,
+	[Value] [nvarchar](max) NULL,
+	[ExpireAt] [datetime] NULL,
+ CONSTRAINT [PK_HangFire_List] PRIMARY KEY CLUSTERED 
+(
+	[Key] ASC,
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [HangFire].[Schema]    Script Date: 1/9/2025 8:50:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [HangFire].[Schema](
+	[Version] [int] NOT NULL,
+ CONSTRAINT [PK_HangFire_Schema] PRIMARY KEY CLUSTERED 
+(
+	[Version] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [HangFire].[Server]    Script Date: 1/9/2025 8:50:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [HangFire].[Server](
+	[Id] [nvarchar](200) NOT NULL,
+	[Data] [nvarchar](max) NULL,
+	[LastHeartbeat] [datetime] NOT NULL,
+ CONSTRAINT [PK_HangFire_Server] PRIMARY KEY CLUSTERED 
+(
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [HangFire].[Set]    Script Date: 1/9/2025 8:50:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [HangFire].[Set](
+	[Key] [nvarchar](100) NOT NULL,
+	[Score] [float] NOT NULL,
+	[Value] [nvarchar](256) NOT NULL,
+	[ExpireAt] [datetime] NULL,
+ CONSTRAINT [PK_HangFire_Set] PRIMARY KEY CLUSTERED 
+(
+	[Key] ASC,
+	[Value] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = ON, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [HangFire].[State]    Script Date: 1/9/2025 8:50:07 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [HangFire].[State](
+	[Id] [bigint] IDENTITY(1,1) NOT NULL,
+	[JobId] [bigint] NOT NULL,
+	[Name] [nvarchar](20) NOT NULL,
+	[Reason] [nvarchar](100) NULL,
+	[CreatedAt] [datetime] NOT NULL,
+	[Data] [nvarchar](max) NULL,
+ CONSTRAINT [PK_HangFire_State] PRIMARY KEY CLUSTERED 
+(
+	[JobId] ASC,
+	[Id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+SET IDENTITY_INSERT [HangFire].[Counter] ON 
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 1)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 4)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 7)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 10)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', -1, NULL, 13)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 14)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', -1, NULL, 17)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', -1, NULL, 18)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 19)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', -1, NULL, 22)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 23)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 26)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', -1, NULL, 29)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', -1, NULL, 30)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 31)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', -1, NULL, 34)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 35)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', -1, NULL, 36)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 39)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded', 1, NULL, 42)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:50:06.653' AS DateTime), 2)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:50:07.487' AS DateTime), 5)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:50:09.840' AS DateTime), 8)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:50:27.860' AS DateTime), 11)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:52:39.540' AS DateTime), 15)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:52:45.357' AS DateTime), 20)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:52:46.940' AS DateTime), 24)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:52:48.483' AS DateTime), 27)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:53:04.147' AS DateTime), 32)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:53:05.807' AS DateTime), 37)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:53:07.210' AS DateTime), 40)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08', 1, CAST(N'2025-02-08T13:53:08.717' AS DateTime), 43)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:50:06.653' AS DateTime), 3)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:50:07.487' AS DateTime), 6)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:50:09.840' AS DateTime), 9)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:50:27.860' AS DateTime), 12)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:52:39.540' AS DateTime), 16)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:52:45.357' AS DateTime), 21)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:52:46.940' AS DateTime), 25)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:52:48.483' AS DateTime), 28)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:53:04.147' AS DateTime), 33)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:53:05.807' AS DateTime), 38)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:53:07.210' AS DateTime), 41)
+GO
+INSERT [HangFire].[Counter] ([Key], [Value], [ExpireAt], [Id]) VALUES (N'stats:succeeded:2025-01-08-13', 1, CAST(N'2025-01-09T13:53:08.717' AS DateTime), 44)
+GO
+SET IDENTITY_INSERT [HangFire].[Counter] OFF
+GO
+SET IDENTITY_INSERT [HangFire].[Job] ON 
+GO
+INSERT [HangFire].[Job] ([Id], [StateId], [StateName], [InvocationData], [Arguments], [CreatedAt], [ExpireAt]) VALUES (1, 54, N'Succeeded', N'{"Type":"Hang_Fire.Services.HangfireJobService, Hang-Fire","Method":"SendNotification","ParameterTypes":"[]"}', N'[]', CAST(N'2025-01-08T13:48:05.133' AS DateTime), CAST(N'2025-01-09T13:53:08.717' AS DateTime))
+GO
+INSERT [HangFire].[Job] ([Id], [StateId], [StateName], [InvocationData], [Arguments], [CreatedAt], [ExpireAt]) VALUES (2, 52, N'Succeeded', N'{"Type":"Hang_Fire.Services.HangfireJobService, Hang-Fire","Method":"SendNotification","ParameterTypes":"[]"}', N'[]', CAST(N'2025-01-08T13:48:06.387' AS DateTime), CAST(N'2025-01-09T13:53:07.210' AS DateTime))
+GO
+INSERT [HangFire].[Job] ([Id], [StateId], [StateName], [InvocationData], [Arguments], [CreatedAt], [ExpireAt]) VALUES (3, 49, N'Succeeded', N'{"Type":"Hang_Fire.Services.HangfireJobService, Hang-Fire","Method":"SendNotification","ParameterTypes":"[]"}', N'[]', CAST(N'2025-01-08T13:49:59.157' AS DateTime), CAST(N'2025-01-09T13:53:05.807' AS DateTime))
+GO
+INSERT [HangFire].[Job] ([Id], [StateId], [StateName], [InvocationData], [Arguments], [CreatedAt], [ExpireAt]) VALUES (4, 46, N'Succeeded', N'{"Type":"Hang_Fire.Services.HangfireJobService, Hang-Fire","Method":"SendNotification","ParameterTypes":"[]"}', N'[]', CAST(N'2025-01-08T13:50:00.317' AS DateTime), CAST(N'2025-01-09T13:53:04.147' AS DateTime))
+GO
+SET IDENTITY_INSERT [HangFire].[Job] OFF
+GO
+INSERT [HangFire].[JobParameter] ([JobId], [Name], [Value]) VALUES (1, N'CurrentCulture', N'"en-PK"')
+GO
+INSERT [HangFire].[JobParameter] ([JobId], [Name], [Value]) VALUES (1, N'CurrentUICulture', N'"en-US"')
+GO
+INSERT [HangFire].[JobParameter] ([JobId], [Name], [Value]) VALUES (1, N'RetryCount', N'2')
+GO
+INSERT [HangFire].[JobParameter] ([JobId], [Name], [Value]) VALUES (2, N'CurrentCulture', N'"en-PK"')
+GO
+INSERT [HangFire].[JobParameter] ([JobId], [Name], [Value]) VALUES (2, N'CurrentUICulture', N'"en-US"')
+GO
+INSERT [HangFire].[JobParameter] ([JobId], [Name], [Value]) VALUES (2, N'RetryCount', N'2')
+GO
+INSERT [HangFire].[JobParameter] ([JobId], [Name], [Value]) VALUES (3, N'CurrentCulture', N'"en-PK"')
+GO
+INSERT [HangFire].[JobParameter] ([JobId], [Name], [Value]) VALUES (3, N'CurrentUICulture', N'"en-US"')
+GO
+INSERT [HangFire].[JobParameter] ([JobId], [Name], [Value]) VALUES (4, N'CurrentCulture', N'"en-PK"')
+GO
+INSERT [HangFire].[JobParameter] ([JobId], [Name], [Value]) VALUES (4, N'CurrentUICulture', N'"en-US"')
+GO
+INSERT [HangFire].[Schema] ([Version]) VALUES (9)
+GO
+INSERT [HangFire].[Server] ([Id], [Data], [LastHeartbeat]) VALUES (N'wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52', N'{"WorkerCount":20,"Queues":["default"],"StartedAt":"2025-01-08T13:50:01.5923561Z"}', CAST(N'2025-01-08T13:54:33.277' AS DateTime))
+GO
+INSERT [HangFire].[Server] ([Id], [Data], [LastHeartbeat]) VALUES (N'wmi-dev-128:26188:b095a602-d3c3-4494-8efe-01698df5ccb0', N'{"WorkerCount":20,"Queues":["default"],"StartedAt":"2025-01-08T13:46:00.6341307Z"}', CAST(N'2025-01-08T13:47:31.407' AS DateTime))
+GO
+INSERT [HangFire].[Server] ([Id], [Data], [LastHeartbeat]) VALUES (N'wmi-dev-128:35376:78d6486f-d1f1-4f89-bade-891ba6538257', N'{"WorkerCount":20,"Queues":["default"],"StartedAt":"2025-01-08T13:48:07.7423609Z"}', CAST(N'2025-01-08T13:49:09.050' AS DateTime))
+GO
+SET IDENTITY_INSERT [HangFire].[State] ON 
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (1, 1, N'Enqueued', NULL, CAST(N'2025-01-08T13:48:05.550' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:48:05.0837735Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (3, 1, N'Processing', NULL, CAST(N'2025-01-08T13:48:11.793' AS DateTime), N'{"StartedAt":"2025-01-08T13:48:08.7843423Z","ServerId":"wmi-dev-128:35376:78d6486f-d1f1-4f89-bade-891ba6538257","WorkerId":"e79813ad-5af7-44f2-8f34-3b169c1e6159"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (4, 1, N'Failed', N'An exception occurred during performance of the job.', CAST(N'2025-01-08T13:48:17.377' AS DateTime), N'{"FailedAt":"2025-01-08T13:48:16.6838000Z","ExceptionType":"System.NotImplementedException","ExceptionMessage":"The method or operation is not implemented.","ExceptionDetails":"System.NotImplementedException: The method or operation is not implemented.\r\n   at Hang_Fire.Services.HangfireJobService.SendNotification()\r\n   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)\r\n","ServerId":"wmi-dev-128:35376:78d6486f-d1f1-4f89-bade-891ba6538257"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (5, 1, N'Scheduled', N'Retry attempt 1 of 10: The method or operation is not implemented.', CAST(N'2025-01-08T13:48:17.377' AS DateTime), N'{"EnqueueAt":"2025-01-08T13:48:50.1834196Z","ScheduledAt":"2025-01-08T13:48:17.1834215Z"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (10, 1, N'Enqueued', N'Triggered by DelayedJobScheduler', CAST(N'2025-01-08T13:49:00.430' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:48:59.9479517Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (11, 1, N'Processing', NULL, CAST(N'2025-01-08T13:49:02.213' AS DateTime), N'{"StartedAt":"2025-01-08T13:49:01.7196857Z","ServerId":"wmi-dev-128:35376:78d6486f-d1f1-4f89-bade-891ba6538257","WorkerId":"ef168139-048c-4789-8edc-36a6094edd54"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (12, 1, N'Failed', N'An exception occurred during performance of the job.', CAST(N'2025-01-08T13:49:09.630' AS DateTime), N'{"FailedAt":"2025-01-08T13:49:08.9702363Z","ExceptionType":"System.NotImplementedException","ExceptionMessage":"The method or operation is not implemented.","ExceptionDetails":"System.NotImplementedException: The method or operation is not implemented.\r\n   at Hang_Fire.Services.HangfireJobService.SendNotification()\r\n   at InvokeStub_HangfireJobService.SendNotification(Object, Object, IntPtr*)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)\r\n","ServerId":"wmi-dev-128:35376:78d6486f-d1f1-4f89-bade-891ba6538257"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (13, 1, N'Scheduled', N'Retry attempt 2 of 10: The method or operation is not implemented.', CAST(N'2025-01-08T13:49:09.630' AS DateTime), N'{"EnqueueAt":"2025-01-08T13:49:53.4613443Z","ScheduledAt":"2025-01-08T13:49:09.4613456Z"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (20, 1, N'Enqueued', N'Triggered by DelayedJobScheduler', CAST(N'2025-01-08T13:50:04.767' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:50:04.2426953Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (22, 1, N'Processing', NULL, CAST(N'2025-01-08T13:50:06.280' AS DateTime), N'{"StartedAt":"2025-01-08T13:50:05.8273817Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"bacb0380-7027-4058-b42d-eccb08520ced"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (25, 1, N'Succeeded', NULL, CAST(N'2025-01-08T13:50:07.487' AS DateTime), N'{"SucceededAt":"2025-01-08T13:50:07.0394004Z","PerformanceDuration":"0","Latency":"121905"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (39, 1, N'Enqueued', N'Triggered via Dashboard UI', CAST(N'2025-01-08T13:52:45.813' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:52:45.3300580Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (41, 1, N'Processing', NULL, CAST(N'2025-01-08T13:52:47.293' AS DateTime), N'{"StartedAt":"2025-01-08T13:52:46.8458107Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"a96fa2e7-7d13-4a2e-af83-df93e7b25532"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (42, 1, N'Succeeded', NULL, CAST(N'2025-01-08T13:52:48.483' AS DateTime), N'{"SucceededAt":"2025-01-08T13:52:48.0379834Z","PerformanceDuration":"1","Latency":"282903"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (50, 1, N'Enqueued', N'Triggered via Dashboard UI', CAST(N'2025-01-08T13:53:05.997' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:53:05.5450315Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (53, 1, N'Processing', NULL, CAST(N'2025-01-08T13:53:07.497' AS DateTime), N'{"StartedAt":"2025-01-08T13:53:07.0420348Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"4f5dd98e-8210-42b0-9b73-f2001864b41c"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (54, 1, N'Succeeded', NULL, CAST(N'2025-01-08T13:53:08.717' AS DateTime), N'{"SucceededAt":"2025-01-08T13:53:08.2551771Z","PerformanceDuration":"0","Latency":"303121"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (2, 2, N'Scheduled', NULL, CAST(N'2025-01-08T13:48:06.730' AS DateTime), N'{"EnqueueAt":"2025-01-08T13:48:11.3870585Z","ScheduledAt":"2025-01-08T13:48:06.3871081Z"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (6, 2, N'Enqueued', N'Triggered by DelayedJobScheduler', CAST(N'2025-01-08T13:48:26.713' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:48:26.2269380Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (7, 2, N'Processing', NULL, CAST(N'2025-01-08T13:48:28.350' AS DateTime), N'{"StartedAt":"2025-01-08T13:48:27.8542650Z","ServerId":"wmi-dev-128:35376:78d6486f-d1f1-4f89-bade-891ba6538257","WorkerId":"e56491ad-0e2c-4911-8abc-a78b4f8fd488"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (8, 2, N'Failed', N'An exception occurred during performance of the job.', CAST(N'2025-01-08T13:48:31.683' AS DateTime), N'{"FailedAt":"2025-01-08T13:48:31.0331412Z","ExceptionType":"System.NotImplementedException","ExceptionMessage":"The method or operation is not implemented.","ExceptionDetails":"System.NotImplementedException: The method or operation is not implemented.\r\n   at Hang_Fire.Services.HangfireJobService.SendNotification()\r\n   at InvokeStub_HangfireJobService.SendNotification(Object, Object, IntPtr*)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)\r\n","ServerId":"wmi-dev-128:35376:78d6486f-d1f1-4f89-bade-891ba6538257"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (9, 2, N'Scheduled', N'Retry attempt 1 of 10: The method or operation is not implemented.', CAST(N'2025-01-08T13:48:31.683' AS DateTime), N'{"EnqueueAt":"2025-01-08T13:49:06.5145859Z","ScheduledAt":"2025-01-08T13:48:31.5145888Z"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (14, 2, N'Enqueued', N'Triggered by DelayedJobScheduler', CAST(N'2025-01-08T13:49:18.480' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:49:17.9952754Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (15, 2, N'Processing', NULL, CAST(N'2025-01-08T13:49:20.287' AS DateTime), N'{"StartedAt":"2025-01-08T13:49:19.7746782Z","ServerId":"wmi-dev-128:35376:78d6486f-d1f1-4f89-bade-891ba6538257","WorkerId":"31d95c4d-ea43-43d5-87c7-6a51154d7152"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (16, 2, N'Failed', N'An exception occurred during performance of the job.', CAST(N'2025-01-08T13:49:25.153' AS DateTime), N'{"FailedAt":"2025-01-08T13:49:24.4925674Z","ExceptionType":"System.NotImplementedException","ExceptionMessage":"The method or operation is not implemented.","ExceptionDetails":"System.NotImplementedException: The method or operation is not implemented.\r\n   at Hang_Fire.Services.HangfireJobService.SendNotification()\r\n   at InvokeStub_HangfireJobService.SendNotification(Object, Object, IntPtr*)\r\n   at System.Reflection.MethodBaseInvoker.InvokeWithNoArgs(Object obj, BindingFlags invokeAttr)\r\n","ServerId":"wmi-dev-128:35376:78d6486f-d1f1-4f89-bade-891ba6538257"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (17, 2, N'Scheduled', N'Retry attempt 2 of 10: The method or operation is not implemented.', CAST(N'2025-01-08T13:49:25.153' AS DateTime), N'{"EnqueueAt":"2025-01-08T13:50:12.9842703Z","ScheduledAt":"2025-01-08T13:49:24.9842735Z"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (28, 2, N'Enqueued', N'Triggered by DelayedJobScheduler', CAST(N'2025-01-08T13:50:24.880' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:50:24.4230450Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (29, 2, N'Processing', NULL, CAST(N'2025-01-08T13:50:26.583' AS DateTime), N'{"StartedAt":"2025-01-08T13:50:26.1009613Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"a5401edc-2f24-45e5-9466-5fa3cd1e015e"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (30, 2, N'Succeeded', NULL, CAST(N'2025-01-08T13:50:27.860' AS DateTime), N'{"SucceededAt":"2025-01-08T13:50:27.3793714Z","PerformanceDuration":"0","Latency":"140991"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (36, 2, N'Enqueued', N'Triggered via Dashboard UI', CAST(N'2025-01-08T13:52:44.217' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:52:43.7321142Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (38, 2, N'Processing', NULL, CAST(N'2025-01-08T13:52:45.750' AS DateTime), N'{"StartedAt":"2025-01-08T13:52:45.3001051Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"71d5b185-8ae4-4afe-ab6e-ca1e7e5f25a0"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (40, 2, N'Succeeded', NULL, CAST(N'2025-01-08T13:52:46.940' AS DateTime), N'{"SucceededAt":"2025-01-08T13:52:46.4928367Z","PerformanceDuration":"0","Latency":"280105"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (48, 2, N'Enqueued', N'Triggered via Dashboard UI', CAST(N'2025-01-08T13:53:04.503' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:53:04.0572941Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (51, 2, N'Processing', NULL, CAST(N'2025-01-08T13:53:06.003' AS DateTime), N'{"StartedAt":"2025-01-08T13:53:05.5494015Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"c17174d4-fa3f-4256-a261-61bf2a5ddab1"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (52, 2, N'Succeeded', NULL, CAST(N'2025-01-08T13:53:07.210' AS DateTime), N'{"SucceededAt":"2025-01-08T13:53:06.7576093Z","PerformanceDuration":"0","Latency":"300370"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (18, 3, N'Enqueued', NULL, CAST(N'2025-01-08T13:49:59.547' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:49:59.1004379Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (21, 3, N'Processing', NULL, CAST(N'2025-01-08T13:50:05.417' AS DateTime), N'{"StartedAt":"2025-01-08T13:50:02.5580541Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"aaba6cc6-19fc-4849-86e0-4abefe9110e6"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (23, 3, N'Succeeded', NULL, CAST(N'2025-01-08T13:50:06.653' AS DateTime), N'{"SucceededAt":"2025-01-08T13:50:06.1971378Z","PerformanceDuration":"9","Latency":"7030"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (34, 3, N'Enqueued', N'Triggered via Dashboard UI', CAST(N'2025-01-08T13:52:42.610' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:52:42.1304115Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (35, 3, N'Processing', NULL, CAST(N'2025-01-08T13:52:44.170' AS DateTime), N'{"StartedAt":"2025-01-08T13:52:43.7250412Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"a96fa2e7-7d13-4a2e-af83-df93e7b25532"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (37, 3, N'Succeeded', NULL, CAST(N'2025-01-08T13:52:45.357' AS DateTime), N'{"SucceededAt":"2025-01-08T13:52:44.9131202Z","PerformanceDuration":"0","Latency":"165755"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (45, 3, N'Enqueued', N'Triggered via Dashboard UI', CAST(N'2025-01-08T13:53:03.017' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:53:02.5707764Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (47, 3, N'Processing', NULL, CAST(N'2025-01-08T13:53:04.443' AS DateTime), N'{"StartedAt":"2025-01-08T13:53:03.9324124Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"7cb49c54-9883-4f5c-be03-e845596f5801"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (49, 3, N'Succeeded', NULL, CAST(N'2025-01-08T13:53:05.807' AS DateTime), N'{"SucceededAt":"2025-01-08T13:53:05.2923283Z","PerformanceDuration":"0","Latency":"186134"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (19, 4, N'Scheduled', NULL, CAST(N'2025-01-08T13:50:00.650' AS DateTime), N'{"EnqueueAt":"2025-01-08T13:50:05.3162861Z","ScheduledAt":"2025-01-08T13:50:00.3163386Z"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (24, 4, N'Enqueued', N'Triggered by DelayedJobScheduler', CAST(N'2025-01-08T13:50:07.010' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:50:06.5631886Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (26, 4, N'Processing', NULL, CAST(N'2025-01-08T13:50:08.557' AS DateTime), N'{"StartedAt":"2025-01-08T13:50:08.0755806Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"413a54ba-5d07-4962-b118-e97b3386b0f5"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (27, 4, N'Succeeded', NULL, CAST(N'2025-01-08T13:50:09.840' AS DateTime), N'{"SucceededAt":"2025-01-08T13:50:09.3554119Z","PerformanceDuration":"0","Latency":"9037"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (31, 4, N'Enqueued', N'Triggered via Dashboard UI', CAST(N'2025-01-08T13:52:36.720' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:52:36.2612567Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (32, 4, N'Processing', NULL, CAST(N'2025-01-08T13:52:38.263' AS DateTime), N'{"StartedAt":"2025-01-08T13:52:37.7816016Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"4a50689a-2191-49b2-99fb-6e88bc20514f"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (33, 4, N'Succeeded', NULL, CAST(N'2025-01-08T13:52:39.540' AS DateTime), N'{"SucceededAt":"2025-01-08T13:52:39.0569088Z","PerformanceDuration":"0","Latency":"158739"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (43, 4, N'Enqueued', N'Triggered via Dashboard UI', CAST(N'2025-01-08T13:53:01.530' AS DateTime), N'{"EnqueuedAt":"2025-01-08T13:53:01.0777773Z","Queue":"default"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (44, 4, N'Processing', NULL, CAST(N'2025-01-08T13:53:02.953' AS DateTime), N'{"StartedAt":"2025-01-08T13:53:02.5114014Z","ServerId":"wmi-dev-128:22876:45e86234-c3a3-48c2-b32a-bbc614958c52","WorkerId":"42ad9924-4491-4285-9432-b5d98c95072a"}')
+GO
+INSERT [HangFire].[State] ([Id], [JobId], [Name], [Reason], [CreatedAt], [Data]) VALUES (46, 4, N'Succeeded', NULL, CAST(N'2025-01-08T13:53:04.147' AS DateTime), N'{"SucceededAt":"2025-01-08T13:53:03.7005079Z","PerformanceDuration":"1","Latency":"183382"}')
+GO
+SET IDENTITY_INSERT [HangFire].[State] OFF
+GO
+ALTER TABLE [HangFire].[JobParameter]  WITH CHECK ADD  CONSTRAINT [FK_HangFire_JobParameter_Job] FOREIGN KEY([JobId])
+REFERENCES [HangFire].[Job] ([Id])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [HangFire].[JobParameter] CHECK CONSTRAINT [FK_HangFire_JobParameter_Job]
+GO
+ALTER TABLE [HangFire].[State]  WITH CHECK ADD  CONSTRAINT [FK_HangFire_State_Job] FOREIGN KEY([JobId])
+REFERENCES [HangFire].[Job] ([Id])
+ON UPDATE CASCADE
+ON DELETE CASCADE
+GO
+ALTER TABLE [HangFire].[State] CHECK CONSTRAINT [FK_HangFire_State_Job]
+GO
